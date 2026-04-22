@@ -91,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..b6c76db00 100644
+index 730a103fa..acf000b1b 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -115,7 +115,7 @@ index 730a103fa..b6c76db00 100644
 -                            f'"{devenv}"'
 -                            f' platform/{win32_infix}/mupdf.sln'
 -                            f' /Build "{build}"'
-+                            f'call {devenv}'
++                            '\\'.join(f'"{p}"' if ' ' in p else p for p in devenv.split('\\'))
 +                            # f' {build_dirs.dir_mupdf}\platform\{win32_infix}\mupdf.sln'
 +                            # f' /Build "{build}"'
                              )
