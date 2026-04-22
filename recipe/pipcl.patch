@@ -1,5 +1,5 @@
 diff --git a/scripts/pipcl.py b/scripts/pipcl.py
-index f5d24b4fb..b76434abb 100644
+index f5d24b4fb..7def21814 100644
 --- a/scripts/pipcl.py
 +++ b/scripts/pipcl.py
 @@ -19,7 +19,18 @@ import hashlib
@@ -22,3 +22,13 @@ index f5d24b4fb..b76434abb 100644
  import re
  import shutil
  import site
+@@ -607,8 +618,7 @@ class Package:
+             # PEP-425. On Linux gives `linux_x86_64` which is rejected by
+             # pypi.org.
+             #
+-            import setuptools
+-            tag_platform = setuptools.distutils.util.get_platform().replace('-', '_').replace('.', '_')
++            tag_platform = sysconfig.get_platform().replace('-', '_').replace('.', '_')
+ 
+             # We need to patch things on MacOS.
+             #
