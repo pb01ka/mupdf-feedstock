@@ -43,19 +43,19 @@ index 6b16fdc63..fb4053669 100755
 --- a/scripts/mupdfwrap_test.py
 +++ b/scripts/mupdfwrap_test.py
 @@ -6,7 +6,7 @@ Simple tests of the Python MuPDF API.
-
+ 
  import inspect
  import os
 -import platform
 +from import_platform import platform
  import sys
-
+ 
  if os.environ.get('MUPDF_PYTHON') in ('swig', None):
 diff --git a/scripts/pipcl.py b/scripts/pipcl.py
-index f5d24b4fb..7def21814 100644
+index f5d24b4fb..524b7b374 100644
 --- a/scripts/pipcl.py
 +++ b/scripts/pipcl.py
-@@ -19,7 +19,18 @@ import hashlib
+@@ -19,7 +19,10 @@ import hashlib
  import inspect
  import io
  import os
@@ -63,26 +63,18 @@ index f5d24b4fb..7def21814 100644
 +# Load stdlib's 'platform' module explicitly. The mupdf source tree contains a
 +# 'platform/' directory that can shadow the stdlib module when the source root
 +# is on sys.path (notably on Windows).
-+import importlib.util as _importlib_util
-+import sysconfig as _sysconfig
-+_platform_spec = _importlib_util.spec_from_file_location(
-+    'platform',
-+    os.path.join(_sysconfig.get_path('stdlib'), 'platform.py'),
-+)
-+platform = _importlib_util.module_from_spec(_platform_spec)
-+_platform_spec.loader.exec_module(platform)
-+del _importlib_util, _sysconfig, _platform_spec
++from import_platform import platform
  import re
  import shutil
  import site
-@@ -607,8 +618,7 @@ class Package:
+@@ -607,8 +610,7 @@ class Package:
              # PEP-425. On Linux gives `linux_x86_64` which is rejected by
              # pypi.org.
              #
 -            import setuptools
 -            tag_platform = setuptools.distutils.util.get_platform().replace('-', '_').replace('.', '_')
 +            tag_platform = sysconfig.get_platform().replace('-', '_').replace('.', '_')
-
+ 
              # We need to patch things on MacOS.
              #
 diff --git a/scripts/wdev.py b/scripts/wdev.py
@@ -91,7 +83,7 @@ index 4d3ab9d26..9f4855ddd 100644
 +++ b/scripts/wdev.py
 @@ -3,7 +3,7 @@ Finds locations of Windows command-line development tools.
  '''
-
+ 
  import os
 -import platform
 +from import_platform import platform
@@ -99,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..60d4f72ed 100644
+index 730a103fa..88c1d4aef 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -111,20 +103,17 @@ index 730a103fa..60d4f72ed 100644
  import re
  import shlex
  import shutil
-@@ -1593,11 +1593,12 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+@@ -1593,9 +1593,9 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
                      #
                      win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
                      jlib.log(f'Building mupdfcpp.dll by running devenv ...')
-+                    jlib.system(f'echo %cd%', verbose=1, out='log')
++                    jlib.system(f'echo {build_dirs.dir_mupdf}', verbose=1, out='log')
                      build = f'{windows_build_type}|{build_dirs.cpu.windows_config}'
                      command = (
-                             f'cd {build_dirs.dir_mupdf}&&'
+-                            f'cd {build_dirs.dir_mupdf}&&'
                              f'"{devenv}"'
--                            f' platform/{win32_infix}/mupdf.sln'
-+                            f' {build_dirs.dir_mupdf}/platform/{win32_infix}/mupdf.sln'
+                             f' platform/{win32_infix}/mupdf.sln'
                              f' /Build "{build}"'
-                             )
-                     projects = ['mupdfcpp', 'libmuthreads']
 diff --git a/scripts/wrap/parse.py b/scripts/wrap/parse.py
 index 1954101af..57b71f426 100644
 --- a/scripts/wrap/parse.py
@@ -140,7 +129,7 @@ index 1954101af..57b71f426 100644
  import time
 @@ -9,9 +9,10 @@ import time
  import jlib
-
+ 
  try:
 -    import clang
 +    import clang.cindex
@@ -149,12 +138,12 @@ index 1954101af..57b71f426 100644
 +    if '--venv' not in sys.argv:
 +        jlib.log( 'Warning, could not import clang: {e}')
      clang = None
-
+ 
  from . import classes
 @@ -487,6 +488,10 @@ class Arg:
-
+ 
  get_args_cache = dict()
-
+ 
 +# get_args() needs to know how to get something hashable from a clang.cindex.Cursor.
 +if clang:
 +    g_cursor_is_hashable = issubclass(clang.cindex.Cursor, collections.abc.Hashable)
@@ -179,21 +168,21 @@ index a8892a7f1..ee997da28 100644
 --- a/scripts/wrap/state.py
 +++ b/scripts/wrap/state.py
 @@ -4,7 +4,7 @@ Misc state.
-
+ 
  import glob
  import os
 -import platform
 +from import_platform import platform
  import re
  import sys
-
+ 
 diff --git a/setup.py b/setup.py
 index 70440190c..e97d73c5a 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -34,7 +34,12 @@ Internal testing only - environmental variables:
  '''
-
+ 
  import os
 -import platform
 +
