@@ -91,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..24a773ab9 100644
+index 730a103fa..54a1c40b3 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -114,7 +114,7 @@ index 730a103fa..24a773ab9 100644
 -                            f'cd {build_dirs.dir_mupdf}&&'
                              f'"{devenv}"'
 -                            f' platform/{win32_infix}/mupdf.sln'
-+                            f' platform\{win32_infix}\mupdf.sln'
++                            f' {build_dirs.dir_mupdf}\platform\{win32_infix}\mupdf.sln'
                              f' /Build "{build}"'
                              )
                      projects = ['mupdfcpp', 'libmuthreads']
