@@ -1,13 +1,24 @@
 diff --git a/scripts/pipcl.py b/scripts/pipcl.py
-index f5d24b4fb..53fdb6768 100644
+index f5d24b4fb..b76434abb 100644
 --- a/scripts/pipcl.py
 +++ b/scripts/pipcl.py
-@@ -584,7 +584,7 @@ class Package:
-         if self.tag_python:
-             tag_python = self.tag_python
-         else:
--            tag_python = 'cp' + ''.join(platform.python_version().split('.')[:2])
-+            tag_python = 'cp' + ''.join(sys.version.split('.')[:2])
-
-         # ABI tag.
-         if self.tag_abi:
+@@ -19,7 +19,18 @@ import hashlib
+ import inspect
+ import io
+ import os
+-import platform
++# Load stdlib's 'platform' module explicitly. The mupdf source tree contains a
++# 'platform/' directory that can shadow the stdlib module when the source root
++# is on sys.path (notably on Windows).
++import importlib.util as _importlib_util
++import sysconfig as _sysconfig
++_platform_spec = _importlib_util.spec_from_file_location(
++    'platform',
++    os.path.join(_sysconfig.get_path('stdlib'), 'platform.py'),
++)
++platform = _importlib_util.module_from_spec(_platform_spec)
++_platform_spec.loader.exec_module(platform)
++del _importlib_util, _sysconfig, _platform_spec
+ import re
+ import shutil
+ import site

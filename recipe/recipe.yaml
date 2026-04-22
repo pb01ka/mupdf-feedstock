@@ -7,8 +7,9 @@ package:
   version: ${{ version }}
 
 source:
-  url: https://www.mupdf.com/downloads/archive/mupdf-${{ version }}-source.tar.gz
-  sha256: 6baf910928f404167ba49be6340195dec340795724722b331f5a2143f5aa0d01
+  git: https://github.com/ArtifexSoftware/mupdf
+  tag: ${{ version }}
+  depth: -1
   patches:
     - if: osx
       then:
@@ -21,6 +22,9 @@ source:
         - pipcl.patch
         # Python extensions must be .so even on macOS, not .dylib
         - python-ext-so.patch
+    - if: win
+      then:
+        - pipcl.patch
 
 build:
   number: 0
