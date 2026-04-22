@@ -91,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..31dd22316 100644
+index 730a103fa..24a773ab9 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -103,7 +103,7 @@ index 730a103fa..31dd22316 100644
  import re
  import shlex
  import shutil
-@@ -1594,8 +1594,10 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+@@ -1594,10 +1594,12 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
                      win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
                      jlib.log(f'Building mupdfcpp.dll by running devenv ...')
                      build = f'{windows_build_type}|{build_dirs.cpu.windows_config}'
@@ -113,8 +113,11 @@ index 730a103fa..31dd22316 100644
                      command = (
 -                            f'cd {build_dirs.dir_mupdf}&&'
                              f'"{devenv}"'
-                             f' platform/{win32_infix}/mupdf.sln'
+-                            f' platform/{win32_infix}/mupdf.sln'
++                            f' platform\{win32_infix}\mupdf.sln'
                              f' /Build "{build}"'
+                             )
+                     projects = ['mupdfcpp', 'libmuthreads']
 diff --git a/scripts/wrap/parse.py b/scripts/wrap/parse.py
 index 1954101af..57b71f426 100644
 --- a/scripts/wrap/parse.py
