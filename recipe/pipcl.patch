@@ -1,0 +1,13 @@
+diff --git a/scripts/pipcl.py b/scripts/pipcl.py
+index f5d24b4fb..53fdb6768 100644
+--- a/scripts/pipcl.py
++++ b/scripts/pipcl.py
+@@ -584,7 +584,7 @@ class Package:
+         if self.tag_python:
+             tag_python = self.tag_python
+         else:
+-            tag_python = 'cp' + ''.join(platform.python_version().split('.')[:2])
++            tag_python = 'cp' + ''.join(sys.version.split('.')[:2])
+
+         # ABI tag.
+         if self.tag_abi:
