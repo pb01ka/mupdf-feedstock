@@ -91,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..270168e22 100644
+index 730a103fa..5510130ae 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -112,9 +112,10 @@ index 730a103fa..270168e22 100644
 +                    jlib.system(f'dir platform\{win32_infix}', verbose=1, out='log')
                      command = (
 -                            f'cd {build_dirs.dir_mupdf}&&'
-                             f'"{devenv}"'
+-                            f'"{devenv}"'
 -                            f' platform/{win32_infix}/mupdf.sln'
 -                            f' /Build "{build}"'
++                            f'call "{devenv}"'
 +                            # f' {build_dirs.dir_mupdf}\platform\{win32_infix}\mupdf.sln'
 +                            # f' /Build "{build}"'
                              )
