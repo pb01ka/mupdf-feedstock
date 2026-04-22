@@ -18,13 +18,12 @@ source:
         - Makerules.patch
         # Fix .so/.dylib references in the Python binding build script
         - wrap.patch
-        - wrap-parse.patch
-        - pipcl.patch
+        - platform-import.patch
         # Python extensions must be .so even on macOS, not .dylib
         - python-ext-so.patch
     - if: win
       then:
-        - pipcl.patch
+        - platform-import.patch
 
 build:
   number: 0

@@ -1,0 +1,193 @@
+diff --git a/scripts/import_platform.py b/scripts/import_platform.py
+new file mode 100644
+index 000000000..f716df0a9
+--- /dev/null
++++ b/scripts/import_platform.py
+@@ -0,0 +1,21 @@
++
++import importlib.util
++import os
++import sysconfig
++
++def get_platform_module():
++    """
++    Loads stdlib's 'platform' module explicitly.
++
++    The mupdf source tree contains a 'platform/' directory that can shadow the
++    stdlib module when the source root is on sys.path (notably on Windows).
++    """
++    spec = importlib.util.spec_from_file_location(
++            'platform',
++            os.path.join(sysconfig.get_path('stdlib'), 'platform.py'),
++            )
++    platform_module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(platform_module)
++    return platform_module
++
++platform = get_platform_module()
+diff --git a/scripts/jlib.py b/scripts/jlib.py
+index 8cfb7bed3..8819bc508 100644
+--- a/scripts/jlib.py
++++ b/scripts/jlib.py
+@@ -3,7 +3,7 @@ import codecs
+ import inspect
+ import io
+ import os
+-import platform
++from import_platform import platform
+ import re
+ import shlex
+ import shutil
+diff --git a/scripts/mupdfwrap_test.py b/scripts/mupdfwrap_test.py
+index 6b16fdc63..fb4053669 100755
+--- a/scripts/mupdfwrap_test.py
++++ b/scripts/mupdfwrap_test.py
+@@ -6,7 +6,7 @@ Simple tests of the Python MuPDF API.
+ 
+ import inspect
+ import os
+-import platform
++from import_platform import platform
+ import sys
+ 
+ if os.environ.get('MUPDF_PYTHON') in ('swig', None):
+diff --git a/scripts/pipcl.py b/scripts/pipcl.py
+index f5d24b4fb..7def21814 100644
+--- a/scripts/pipcl.py
++++ b/scripts/pipcl.py
+@@ -19,7 +19,18 @@ import hashlib
+ import inspect
+ import io
+ import os
+-import platform
++# Load stdlib's 'platform' module explicitly. The mupdf source tree contains a
++# 'platform/' directory that can shadow the stdlib module when the source root
++# is on sys.path (notably on Windows).
++import importlib.util as _importlib_util
++import sysconfig as _sysconfig
++_platform_spec = _importlib_util.spec_from_file_location(
++    'platform',
++    os.path.join(_sysconfig.get_path('stdlib'), 'platform.py'),
++)
++platform = _importlib_util.module_from_spec(_platform_spec)
++_platform_spec.loader.exec_module(platform)
++del _importlib_util, _sysconfig, _platform_spec
+ import re
+ import shutil
+ import site
+@@ -607,8 +618,7 @@ class Package:
+             # PEP-425. On Linux gives `linux_x86_64` which is rejected by
+             # pypi.org.
+             #
+-            import setuptools
+-            tag_platform = setuptools.distutils.util.get_platform().replace('-', '_').replace('.', '_')
++            tag_platform = sysconfig.get_platform().replace('-', '_').replace('.', '_')
+ 
+             # We need to patch things on MacOS.
+             #
+diff --git a/scripts/wdev.py b/scripts/wdev.py
+index 4d3ab9d26..9f4855ddd 100644
+--- a/scripts/wdev.py
++++ b/scripts/wdev.py
+@@ -3,7 +3,7 @@ Finds locations of Windows command-line development tools.
+ '''
+ 
+ import os
+-import platform
++from import_platform import platform
+ import glob
+ import re
+ import subprocess
+diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
+index 730a103fa..b8d77714b 100644
+--- a/scripts/wrap/__main__.py
++++ b/scripts/wrap/__main__.py
+@@ -865,7 +865,7 @@ import glob
+ import multiprocessing
+ import os
+ import pickle
+-import platform
++from import_platform import platform
+ import re
+ import shlex
+ import shutil
+diff --git a/scripts/wrap/parse.py b/scripts/wrap/parse.py
+index 1954101af..57b71f426 100644
+--- a/scripts/wrap/parse.py
++++ b/scripts/wrap/parse.py
+@@ -1,7 +1,7 @@
+ '''
+ Support for accessing parse tree for MuPDF headers.
+ '''
+-
++import collections
+ import os
+ import sys
+ import time
+@@ -9,9 +9,10 @@ import time
+ import jlib
+ 
+ try:
+-    import clang
++    import clang.cindex
+ except ImportError as e:
+-    jlib.log( 'Warning, could not import clang: {e}')
++    if '--venv' not in sys.argv:
++        jlib.log( 'Warning, could not import clang: {e}')
+     clang = None
+ 
+ from . import classes
+@@ -487,6 +488,10 @@ class Arg:
+ 
+ get_args_cache = dict()
+ 
++# get_args() needs to know how to get something hashable from a clang.cindex.Cursor.
++if clang:
++    g_cursor_is_hashable = issubclass(clang.cindex.Cursor, collections.abc.Hashable)
++
+ def get_args( tu, cursor, include_fz_context=False, skip_first_alt=False, verbose=False):
+     '''
+     Yields Arg instance for each arg of the function at <cursor>.
+@@ -509,7 +514,10 @@ def get_args( tu, cursor, include_fz_context=False, skip_first_alt=False, verbos
+     #
+     if verbose:
+         jlib.log( '## Looking at args of {cursor.spelling=}')
+-    key = tu, cursor.location.file, cursor.location.line, include_fz_context, skip_first_alt
++    if g_cursor_is_hashable:
++        key = tu, cursor, include_fz_context, skip_first_alt
++    else:
++        key = tu, cursor.location.file, cursor.location.line, include_fz_context, skip_first_alt
+     ret = get_args_cache.get( key)
+     if not verbose and state.state_.show_details(cursor.spelling):
+         verbose = True
+diff --git a/scripts/wrap/state.py b/scripts/wrap/state.py
+index a8892a7f1..ee997da28 100644
+--- a/scripts/wrap/state.py
++++ b/scripts/wrap/state.py
+@@ -4,7 +4,7 @@ Misc state.
+ 
+ import glob
+ import os
+-import platform
++from import_platform import platform
+ import re
+ import sys
+ 
+diff --git a/setup.py b/setup.py
+index 70440190c..e97d73c5a 100755
+--- a/setup.py
++++ b/setup.py
+@@ -34,7 +34,12 @@ Internal testing only - environmental variables:
+ '''
+ 
+ import os
+-import platform
++
++# Load stdlib's 'platform' module explicitly. The mupdf source tree contains a
++# 'platform/' directory that can shadow the stdlib module when the source root
++# is on sys.path (notably on Windows).
++from scripts.import_platform import platform
++
+ import re
+ import subprocess
+ import sys
