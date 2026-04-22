@@ -91,7 +91,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..acf000b1b 100644
+index 730a103fa..c459a5f30 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -103,21 +103,21 @@ index 730a103fa..acf000b1b 100644
  import re
  import shlex
  import shutil
-@@ -1594,17 +1594,19 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+@@ -1594,17 +1594,20 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
                      win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
                      jlib.log(f'Building mupdfcpp.dll by running devenv ...')
                      build = f'{windows_build_type}|{build_dirs.cpu.windows_config}'
 +                    jlib.system(f'cd {build_dirs.dir_mupdf}', verbose=1, out='log')
 +                    jlib.system(f'dir', verbose=1, out='log')
 +                    jlib.system(f'dir platform\{win32_infix}', verbose=1, out='log')
++                    devenv = '\\'.join(f'"{p}"' if ' ' in p else p for p in devenv.split('\\'))
                      command = (
 -                            f'cd {build_dirs.dir_mupdf}&&'
 -                            f'"{devenv}"'
 -                            f' platform/{win32_infix}/mupdf.sln'
--                            f' /Build "{build}"'
-+                            '\\'.join(f'"{p}"' if ' ' in p else p for p in devenv.split('\\'))
-+                            # f' {build_dirs.dir_mupdf}\platform\{win32_infix}\mupdf.sln'
-+                            # f' /Build "{build}"'
++                            f'{devenv}'
++                            f' platform\{win32_infix}\mupdf.sln'
+                             f' /Build "{build}"'
                              )
                      projects = ['mupdfcpp', 'libmuthreads']
                      if m_target:
