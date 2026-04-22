@@ -99,7 +99,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..0347da2b0 100644
+index 730a103fa..60d4f72ed 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -111,7 +111,12 @@ index 730a103fa..0347da2b0 100644
  import re
  import shlex
  import shutil
-@@ -1597,7 +1597,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+@@ -1593,11 +1593,12 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     #
+                     win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
+                     jlib.log(f'Building mupdfcpp.dll by running devenv ...')
++                    jlib.system(f'echo {build_dirs.dir_mupdf}', verbose=1, out='log')
+                     build = f'{windows_build_type}|{build_dirs.cpu.windows_config}'
                      command = (
                              f'cd {build_dirs.dir_mupdf}&&'
                              f'"{devenv}"'
