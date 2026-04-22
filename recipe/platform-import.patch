@@ -99,7 +99,7 @@ index 4d3ab9d26..9f4855ddd 100644
  import re
  import subprocess
 diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
-index 730a103fa..b8d77714b 100644
+index 730a103fa..33e0dbae7 100644
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
 @@ -865,7 +865,7 @@ import glob
@@ -111,6 +111,44 @@ index 730a103fa..b8d77714b 100644
  import re
  import shlex
  import shutil
+@@ -1064,6 +1064,10 @@ def get_so_version( build_dirs):
+     return f'.{minor}.{patch}'
+ 
+ 
++def _windows_cd_command(directory):
++    return f'cd /d "{directory}"'
++
++
+ def _get_m_command( build_dirs, j=None, make=None, m_target=None, m_vars=None):
+     '''
+     Generates a `make` command for building with `build_dirs.dir_mupdf`.
+@@ -1595,7 +1599,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     jlib.log(f'Building mupdfcpp.dll by running devenv ...')
+                     build = f'{windows_build_type}|{build_dirs.cpu.windows_config}'
+                     command = (
+-                            f'cd {build_dirs.dir_mupdf}&&'
++                            f'{_windows_cd_command(build_dirs.dir_mupdf)}&&'
+                             f'"{devenv}"'
+                             f' platform/{win32_infix}/mupdf.sln'
+                             f' /Build "{build}"'
+@@ -1897,7 +1901,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                             win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
+                             jlib.log('Building mupdfpyswig project')
+                             command = (
+-                                    f'cd {build_dirs.dir_mupdf}&&'
++                                    f'{_windows_cd_command(build_dirs.dir_mupdf)}&&'
+                                     f'"{devenv}"'
+                                     f' platform/{win32_infix}/mupdfpyswig.sln'
+                                     f' /Build "{windows_build_type}Python|{build_dirs.cpu.windows_config}"'
+@@ -1945,7 +1949,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                             win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
+                             jlib.log('Building mupdfcsharp project')
+                             command = (
+-                                    f'cd {build_dirs.dir_mupdf}&&'
++                                    f'{_windows_cd_command(build_dirs.dir_mupdf)}&&'
+                                     f'"{devenv}"'
+                                     f' platform/{win32_infix}/mupdfcsharpswig.sln'
+                                     f' /Build "{windows_build_type}Csharp|{build_dirs.cpu.windows_config}"'
 diff --git a/scripts/wrap/parse.py b/scripts/wrap/parse.py
 index 1954101af..57b71f426 100644
 --- a/scripts/wrap/parse.py
